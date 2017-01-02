@@ -1,4 +1,4 @@
-// Spectrum Colorpicker v1.8.0
+// Spectrum Colorpicker v1.8.1
 // https://github.com/bgrins/spectrum
 // Author: Brian Grinstead
 // License: MIT
@@ -42,7 +42,7 @@
         showSelectionPalette: true,
         localStorageKey: false,
         appendTo: "body",
-        maxSelectionSize: 7,
+        maxSelectionSize: 10,
         cancelText: "cancel",
         chooseText: "choose",
         togglePaletteMoreText: "more",
@@ -55,9 +55,14 @@
         replacerClassName: "",
         showAlpha: false,
         theme: "sp-light",
-        palette: [["#ffffff", "#000000", "#ff0000", "#ff8000", "#ffff00", "#008000", "#0000ff", "#4b0082", "#9400d3"]],
+        palette: [
+            ["rgb(0, 0, 0)", "rgb(34, 34, 34)", "rgb(68, 68, 68)", "rgb(102, 102, 102)", "rgb(136, 136, 136)", "rgb(170, 170, 170)", "rgb(204, 204, 204)", "rgb(238, 238, 238)", "rgb(255, 255, 255)", "transparent"],
+            ["rgb(152, 0, 0)", "rgb(255, 0, 0)", "rgb(255, 153, 0)", "rgb(255, 255, 0)", "rgb(0, 255, 0)", "rgb(0, 255, 255)", "rgb(74, 134, 232)", "rgb(0, 0, 255)", "rgb(153, 0, 255)", "rgb(168, 39, 107)"],
+            ["rgb(230, 184, 175)", "rgb(244, 204, 204)", "rgb(252, 229, 205)", "rgb(255, 242, 204)", "rgb(217, 234, 211)", "rgb(208, 224, 227)", "rgb(201, 218, 248)", "rgb(207, 226, 243)", "rgb(217, 210, 233)", "rgb(234, 209, 220)", "rgb(221, 126, 107)", "rgb(234, 153, 153)", "rgb(249, 203, 156)", "rgb(255, 229, 153)", "rgb(182, 215, 168)", "rgb(162, 196, 201)", "rgb(164, 194, 244)", "rgb(159, 197, 232)", "rgb(180, 167, 214)", "rgb(213, 166, 189)", "rgb(204, 65, 37)", "rgb(224, 102, 102)", "rgb(246, 178, 107)", "rgb(255, 217, 102)", "rgb(147, 196, 125)", "rgb(118, 165, 175)", "rgb(109, 158, 235)", "rgb(111, 168, 220)", "rgb(142, 124, 195)", "rgb(194, 123, 160)", "rgb(166, 28, 0)", "rgb(204, 0, 0)", "rgb(230, 145, 56)", "rgb(241, 194, 50)", "rgb(106, 168, 79)", "rgb(69, 129, 142)", "rgb(60, 120, 216)", "rgb(61, 133, 198)", "rgb(103, 78, 167)", "rgb(166, 77, 121)", "rgb(91, 15, 0)", "rgb(102, 0, 0)", "rgb(120, 63, 4)", "rgb(127, 96, 0)", "rgb(39, 78, 19)", "rgb(12, 52, 61)", "rgb(28, 69, 135)", "rgb(7, 55, 99)", "rgb(32, 18, 77)", "rgb(76, 17, 48)"]
+        ],
         selectionPalette: [],
         disabled: false,
+        // TODO : propriété à virer car elle ne sert à rien
         offset: null
     },
     spectrums = [],
@@ -90,7 +95,8 @@
         }
 
         return [
-            "<div class='sp-container sp-hidden'>",
+            "<div class='sp-container sp-hidden' data-alignment='r'>",
+                "<div class='sp-palette-arrow'></div>",
                 "<div class='sp-palette-container'>",
                     "<div class='sp-palette sp-thumb sp-cf'></div>",
                     "<div class='sp-palette-button-container sp-cf'>",
@@ -136,7 +142,9 @@
             var current = p[i];
             if(current) {
                 var tiny = tinycolor(current);
-                var c = tiny.toHsl().l < 0.5 ? "sp-thumb-el sp-thumb-dark" : "sp-thumb-el sp-thumb-light";
+                var c = tiny.isDark() ? "sp-thumb-el sp-thumb-dark" : "sp-thumb-el sp-thumb-light";
+                if (tiny.getAlpha() < 0.2) c = "sp-thumb-el sp-thumb-light";
+                
                 c += (tinycolor.equals(color, current)) ? " sp-thumb-active" : "";
                 var formattedString = tiny.toString(opts.preferredFormat || "rgb");
                 var swatchStyle = rgbaSupport ? ("background-color:" + tiny.toRgbString()) : "filter:" + tiny.toFilter();
@@ -183,6 +191,7 @@
             localStorageKey = opts.localStorageKey,
             theme = opts.theme,
             callbacks = opts.callbacks,
+            // TODO : resize et throttle à virer
             resize = throttle(reflow, 10),
             visible = false,
             isDragging = false,
@@ -586,14 +595,14 @@
             if ((value === null || value === "") && allowEmpty) {
                 set(null);
                 move();
-                updateOriginalInput();
+                //updateOriginalInput();
             }
             else {
                 var tiny = tinycolor(value);
                 if (tiny.isValid()) {
                     set(tiny);
                     move();
-                    updateOriginalInput();
+                    //updateOriginalInput();
                 }
                 else {
                     textInput.addClass("sp-validation-error");
@@ -629,6 +638,7 @@
 
             $(doc).on("keydown.spectrum", onkeydown);
             $(doc).on("click.spectrum", clickout);
+            // TODO : resize à virer
             $(window).on("resize.spectrum", resize);
             replacer.addClass("sp-active");
             container.removeClass("sp-hidden");
@@ -646,6 +656,7 @@
         function onkeydown(e) {
             // Close on ESC
             if (e.keyCode === 27) {
+                revert();
                 hide();
             }
         }
@@ -790,6 +801,7 @@
                     var realAlpha = tinycolor(rgb).toRgbString();
                     var gradient = "linear-gradient(left, " + realAlpha + ", " + realHex + ")";
 
+                    // TODO : virer tout ce qui touche à InternetExplorer9
                     if (IE) {
                         alphaSliderInner.css("filter", tinycolor(realAlpha).toFilter({ gradientType: 1 }, realHex));
                     }
@@ -878,6 +890,8 @@
                 boundElement.val(displayColor);
             }
 
+            colorOnShow = color;
+
             if (fireCallback && hasChanged) {
                 callbacks.change(color);
                 boundElement.trigger('change', [ color ]);
@@ -899,6 +913,7 @@
 
             if (!flat) {
                 container.css("position", "absolute");
+                // TODO : virer le opts.offset qui ne sert à rien
                 if (opts.offset) {
                     container.offset(opts.offset);
                 } else {
@@ -917,7 +932,13 @@
 
         function destroy() {
             boundElement.show();
+
             offsetElement.off("click.spectrum touchstart.spectrum");
+
+            $(doc).off("keydown.spectrum", onkeydown);
+            $(doc).off("click.spectrum", clickout);
+            $(window).off("resize.spectrum", resize);
+
             container.remove();
             replacer.remove();
             spectrums[spect.id] = null;
@@ -952,6 +973,7 @@
             offsetElement.addClass("sp-disabled");
         }
 
+        // TODO : a virer
         function setOffset(coord) {
             opts.offset = coord;
             reflow();
@@ -987,35 +1009,39 @@
     * Thanks https://github.com/jquery/jquery-ui/blob/master/ui/jquery.ui.datepicker.js
     */
     function getOffset(picker, input) {
-        var extraY = 0;
+        //var extraY = 0;
         var dpWidth = picker.outerWidth();
         var dpHeight = picker.outerHeight();
         var inputHeight = input.outerHeight();
+        var inputWidth = input.outerWidth();
+        
+        /*
         var doc = picker[0].ownerDocument;
         var docElem = doc.documentElement;
         var viewWidth = docElem.clientWidth + $(doc).scrollLeft();
         var viewHeight = docElem.clientHeight + $(doc).scrollTop();
+        */
+
         var offset = input.offset();
+
         var offsetLeft = offset.left;
         var offsetTop = offset.top;
 
-        offsetTop += inputHeight;
+        //offsetTop += inputHeight;
 
-        offsetLeft -=
-            Math.min(offsetLeft, (offsetLeft + dpWidth > viewWidth && viewWidth > dpWidth) ?
-            Math.abs(offsetLeft + dpWidth - viewWidth) : 0);
+        //offsetLeft -= Math.min(offsetLeft, (offsetLeft + dpWidth > viewWidth && viewWidth > dpWidth) ? Math.abs(offsetLeft + dpWidth - viewWidth) : 0);
 
-        offsetTop -=
-            Math.min(offsetTop, ((offsetTop + dpHeight > viewHeight && viewHeight > dpHeight) ?
-            Math.abs(dpHeight + inputHeight - extraY) : extraY));
+        //offsetTop -= Math.min(offsetTop, ((offsetTop + dpHeight > viewHeight && viewHeight > dpHeight) ? Math.abs(dpHeight + inputHeight - extraY) : extraY));
+
+        console.log(dpHeight)
+
+        offsetTop -= 154;
+        offsetLeft += inputWidth + 15;
+        //offsetLeft -= dpWidth + 15;
 
         return {
             top: offsetTop,
-            bottom: offset.bottom,
-            left: offsetLeft,
-            right: offset.right,
-            width: offset.width,
-            height: offset.height
+            left: offsetLeft
         };
     }
 
@@ -1037,6 +1063,7 @@
     * Create a function bound to a given object
     * Thanks to underscore.js
     */
+    // TODO : fonction à virer on peut utiliser un .bind directement sur la fonction
     function bind(func, obj) {
         var slice = Array.prototype.slice;
         var args = slice.call(arguments, 2);
@@ -1136,6 +1163,7 @@
         $(element).on("touchstart mousedown", start);
     }
 
+    // TODO : fonction à virer une fois qu'on aura virer le resize
     function throttle(func, wait, debounce) {
         var timeout;
         return function () {
