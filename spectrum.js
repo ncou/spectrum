@@ -61,12 +61,9 @@
             ["rgb(230, 184, 175)", "rgb(244, 204, 204)", "rgb(252, 229, 205)", "rgb(255, 242, 204)", "rgb(217, 234, 211)", "rgb(208, 224, 227)", "rgb(201, 218, 248)", "rgb(207, 226, 243)", "rgb(217, 210, 233)", "rgb(234, 209, 220)", "rgb(221, 126, 107)", "rgb(234, 153, 153)", "rgb(249, 203, 156)", "rgb(255, 229, 153)", "rgb(182, 215, 168)", "rgb(162, 196, 201)", "rgb(164, 194, 244)", "rgb(159, 197, 232)", "rgb(180, 167, 214)", "rgb(213, 166, 189)", "rgb(204, 65, 37)", "rgb(224, 102, 102)", "rgb(246, 178, 107)", "rgb(255, 217, 102)", "rgb(147, 196, 125)", "rgb(118, 165, 175)", "rgb(109, 158, 235)", "rgb(111, 168, 220)", "rgb(142, 124, 195)", "rgb(194, 123, 160)", "rgb(166, 28, 0)", "rgb(204, 0, 0)", "rgb(230, 145, 56)", "rgb(241, 194, 50)", "rgb(106, 168, 79)", "rgb(69, 129, 142)", "rgb(60, 120, 216)", "rgb(61, 133, 198)", "rgb(103, 78, 167)", "rgb(166, 77, 121)", "rgb(91, 15, 0)", "rgb(102, 0, 0)", "rgb(120, 63, 4)", "rgb(127, 96, 0)", "rgb(39, 78, 19)", "rgb(12, 52, 61)", "rgb(28, 69, 135)", "rgb(7, 55, 99)", "rgb(32, 18, 77)", "rgb(76, 17, 48)"]
         ],
         selectionPalette: [],
-        disabled: false,
-        // TODO : propriété à virer car elle ne sert à rien
-        offset: null
+        disabled: false
     },
     spectrums = [],
-    IE = !!/msie/i.exec( window.navigator.userAgent ),
     rgbaSupport = (function() {
         function contains( str, substr ) {
             return !!~('' + str).indexOf(substr);
@@ -84,16 +81,6 @@
         "</div>"
     ].join(''),
     markup = (function () {
-
-        // IE does not support gradients with multiple stops, so we need to simulate
-        //  that for the rainbow slider with 8 divs that each have a single gradient
-        var gradientFix = "";
-        if (IE) {
-            for (var i = 1; i <= 6; i++) {
-                gradientFix += "<div class='sp-" + i + "'></div>";
-            }
-        }
-
         return [
             "<div class='sp-container sp-hidden' data-alignment='r'>",
                 "<div class='sp-palette-arrow'></div>",
@@ -118,7 +105,6 @@
                             "</div>",
                             "<div class='sp-hue'>",
                                 "<div class='sp-slider'></div>",
-                                gradientFix,
                             "</div>",
                         "</div>",
                         "<div class='sp-alpha'><div class='sp-alpha-inner'><div class='sp-alpha-handle'></div></div></div>",
@@ -133,7 +119,7 @@
                     "</div>",
                 "</div>",
             "</div>"
-        ].join("");
+        ].join('');
     })();
 
     function paletteTemplate (p, color, className, opts) {
@@ -173,11 +159,11 @@
     function instanceOptions(o, callbackContext) {
         var opts = $.extend({}, defaultOpts, o);
         opts.callbacks = {
-            'move': bind(opts.move, callbackContext),
-            'change': bind(opts.change, callbackContext),
-            'show': bind(opts.show, callbackContext),
-            'hide': bind(opts.hide, callbackContext),
-            'beforeShow': bind(opts.beforeShow, callbackContext)
+            'move': opts.move.bind(callbackContext),
+            'change': opts.change.bind(callbackContext),
+            'show': opts.show.bind(callbackContext),
+            'hide': opts.hide.bind(callbackContext),
+            'beforeShow': opts.beforeShow.bind(callbackContext)
         };
 
         return opts;
@@ -191,8 +177,6 @@
             localStorageKey = opts.localStorageKey,
             theme = opts.theme,
             callbacks = opts.callbacks,
-            // TODO : resize et throttle à virer
-            resize = throttle(reflow, 10),
             visible = false,
             isDragging = false,
             dragWidth = 0,
@@ -284,10 +268,6 @@
 
         function initialize() {
 
-            if (IE) {
-                container.find("*:not(input)").attr("unselectable", "on");
-            }
-
             applyOptions();
 
             if (shouldReplace) {
@@ -330,7 +310,7 @@
             }
 
             // Prevent clicks from bubbling up to document.  This would cause it to be hidden.
-            container.click(stopPropagation);
+            container.on('click', function(e){ e.stopPropagation(); });
 
             // Handle user typed input
             textInput.change(setFromTextInput);
@@ -364,10 +344,6 @@
             chooseButton.on("click.spectrum", function (e) {
                 e.stopPropagation();
                 e.preventDefault();
-
-                if (IE && textInput.is(":focus")) {
-                    textInput.trigger('change');
-                }
 
                 if (isValid()) {
                     updateOriginalInput(true);
@@ -485,9 +461,8 @@
                 return false;
             }
 
-            var paletteEvent = IE ? "mousedown.spectrum" : "click.spectrum touchstart.spectrum";
-            paletteContainer.on(paletteEvent, ".sp-thumb-el", paletteElementClick);
-            initialColorContainer.on(paletteEvent, ".sp-thumb-el:nth-child(1)", { ignore: true }, paletteElementClick);
+            paletteContainer.on("click.spectrum touchstart.spectrum", ".sp-thumb-el", paletteElementClick);
+            initialColorContainer.on("click.spectrum touchstart.spectrum", ".sp-thumb-el:nth-child(1)", { ignore: true }, paletteElementClick);
         }
 
         function updateSelectionPaletteFromStorage() {
@@ -638,8 +613,7 @@
 
             $(doc).on("keydown.spectrum", onkeydown);
             $(doc).on("click.spectrum", clickout);
-            // TODO : resize à virer
-            $(window).on("resize.spectrum", resize);
+
             replacer.addClass("sp-active");
             container.removeClass("sp-hidden");
 
@@ -685,7 +659,6 @@
 
             $(doc).off("keydown.spectrum", onkeydown);
             $(doc).off("click.spectrum", clickout);
-            $(window).off("resize.spectrum", resize);
 
             replacer.removeClass("sp-active");
             container.addClass("sp-hidden");
@@ -799,20 +772,14 @@
                     var rgb = realColor.toRgb();
                     rgb.a = 0;
                     var realAlpha = tinycolor(rgb).toRgbString();
-                    var gradient = "linear-gradient(left, " + realAlpha + ", " + realHex + ")";
+                    //var gradient = "linear-gradient(left, " + realAlpha + ", " + realHex + ")";
 
-                    // TODO : virer tout ce qui touche à InternetExplorer9
-                    if (IE) {
-                        alphaSliderInner.css("filter", tinycolor(realAlpha).toFilter({ gradientType: 1 }, realHex));
-                    }
-                    else {
-                        alphaSliderInner.css("background", "-webkit-" + gradient);
-                        alphaSliderInner.css("background", "-moz-" + gradient);
-                        alphaSliderInner.css("background", "-ms-" + gradient);
-                        // Use current syntax gradient on unprefixed property.
-                        alphaSliderInner.css("background",
-                            "linear-gradient(to right, " + realAlpha + ", " + realHex + ")");
-                    }
+                    //alphaSliderInner.css("background", "-webkit-" + gradient);
+                    //alphaSliderInner.css("background", "-moz-" + gradient);
+                    //alphaSliderInner.css("background", "-ms-" + gradient);
+                    //alphaSliderInner.css("background", "-o-" + gradient);
+                    // Use current syntax gradient on unprefixed property.
+                    alphaSliderInner.css("background", "linear-gradient(to right, " + realAlpha + ", " + realHex + ")");
                 }
 
                 displayColor = realColor.toString(format);
@@ -890,8 +857,6 @@
                 boundElement.val(displayColor);
             }
 
-            colorOnShow = color;
-
             if (fireCallback && hasChanged) {
                 callbacks.change(color);
                 boundElement.trigger('change', [ color ]);
@@ -913,12 +878,7 @@
 
             if (!flat) {
                 container.css("position", "absolute");
-                // TODO : virer le opts.offset qui ne sert à rien
-                if (opts.offset) {
-                    container.offset(opts.offset);
-                } else {
-                    container.offset(getOffset(container, offsetElement));
-                }
+                container.offset(getOffset(container, offsetElement));
             }
 
             updateHelperLocations();
@@ -937,7 +897,6 @@
 
             $(doc).off("keydown.spectrum", onkeydown);
             $(doc).off("click.spectrum", clickout);
-            $(window).off("resize.spectrum", resize);
 
             container.remove();
             replacer.remove();
@@ -973,12 +932,6 @@
             offsetElement.addClass("sp-disabled");
         }
 
-        // TODO : a virer
-        function setOffset(coord) {
-            opts.offset = coord;
-            reflow();
-        }
-
         initialize();
 
         var spect = {
@@ -989,7 +942,6 @@
             option: option,
             enable: enable,
             disable: disable,
-            offset: setOffset,
             set: function (c) {
                 set(c);
                 updateOriginalInput();
@@ -1053,26 +1005,6 @@
     }
 
     /**
-    * stopPropagation - makes the code only doing this a little easier to read in line
-    */
-    function stopPropagation(e) {
-        e.stopPropagation();
-    }
-
-    /**
-    * Create a function bound to a given object
-    * Thanks to underscore.js
-    */
-    // TODO : fonction à virer on peut utiliser un .bind directement sur la fonction
-    function bind(func, obj) {
-        var slice = Array.prototype.slice;
-        var args = slice.call(arguments, 2);
-        return function () {
-            return func.apply(obj, args.concat(slice.call(arguments)));
-        };
-    }
-
-    /**
     * Lightweight drag helper.  Handles containment within the element, so that
     * when dragging, the x is within [0,element.width] and y is within [0,element.height]
     */
@@ -1106,10 +1038,6 @@
         function move(e) {
             if (dragging) {
                 // Mouseup happened outside of window
-                if (IE && doc.documentMode < 9 && !e.button) {
-                    return stop();
-                }
-
                 var t0 = e.originalEvent && e.originalEvent.touches && e.originalEvent.touches[0];
                 var pageX = t0 && t0.pageX || e.pageX;
                 var pageY = t0 && t0.pageY || e.pageY;
@@ -1161,20 +1089,6 @@
         }
 
         $(element).on("touchstart mousedown", start);
-    }
-
-    // TODO : fonction à virer une fois qu'on aura virer le resize
-    function throttle(func, wait, debounce) {
-        var timeout;
-        return function () {
-            var context = this, args = arguments;
-            var throttler = function () {
-                timeout = null;
-                func.apply(context, args);
-            };
-            if (debounce) clearTimeout(timeout);
-            if (debounce || !timeout) timeout = setTimeout(throttler, wait);
-        };
     }
 
     function inputTypeColorSupport() {
