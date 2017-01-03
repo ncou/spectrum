@@ -1,5 +1,5 @@
 /***
-Spectrum Colorpicker v1.8.0
+Spectrum Colorpicker v1.8.1
 https://github.com/bgrins/spectrum
 Author: Brian Grinstead
 License: MIT
@@ -57,7 +57,7 @@ License: MIT
 
 .sp-clear-enabled .sp-hue {
     top:33px;
-    height: 77.5%;
+    height: 82.5%;
 }
 
 .sp-fill {
@@ -78,15 +78,16 @@ License: MIT
     display: block;
 }
 .sp-alpha-handle {
-    position:absolute;
-    top:-4px;
-    bottom: -4px;
-    width: 6px;
-    left: 50%;
-    cursor: pointer;
-    border: 1px solid black;
-    background: white;
-    opacity: .8;
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 6px;
+  margin-left: -3px;
+  left: 50%;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  border-radius: 4px
 }
 .sp-alpha {
     display: none;
@@ -160,7 +161,9 @@ License: MIT
 }
 
 .sp-hidden {
-    display: none !important;
+    /*display: none !important;*/
+    opacity: 0;
+    visibility: hidden;
 }
 
 /* Clearfix hack */
@@ -174,26 +177,28 @@ License: MIT
     .sp-fill { padding-top: 60%; }
 }
 .sp-dragger {
-   border-radius: 5px;
-   height: 5px;
-   width: 5px;
-   border: 1px solid #fff;
-   background: #000;
-   cursor: pointer;
-   position:absolute;
-   top:0;
-   left: 0;
+  border-radius: 50%;
+  height: 12px;
+  width: 12px;
+  margin: 5px 0 0 5px;
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  background: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 .sp-slider {
-    position: absolute;
-    top:0;
-    cursor:pointer;
-    height: 3px;
-    left: -1px;
-    right: -1px;
-    border: 1px solid #000;
-    background: white;
-    opacity: .8;
+  position: absolute;
+  top: 0;
+  cursor: pointer;
+  height: 6px;
+  left: -3px;
+  right: -3px;
+  margin-top: 3px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  border-radius: 4px;
 }
 
 /*
@@ -209,6 +214,9 @@ See http://bgrins.github.io/spectrum/themes/ for instructions.
     /*border: solid 1px #f0c49B;*/
     padding: 0;
     box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    will-change: opacity;
+    transition: opacity 0.1s ease-out;
 }
 .sp-container, .sp-container button, .sp-container input, .sp-color, .sp-hue, .sp-clear {
     font: normal 12px "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
@@ -218,39 +226,98 @@ See http://bgrins.github.io/spectrum/themes/ for instructions.
     box-sizing: border-box;
 }
 .sp-top {
-    margin-bottom: 3px;
+    margin-bottom: 6px;
 }
 .sp-color, .sp-hue, .sp-clear {
     border: solid 1px #d0d0d0;
 }
 
+/* Arrow */
+.sp-container .sp-palette-arrow {
+  position: absolute;
+}
+
+.sp-container[data-alignment="t"] .sp-palette-arrow:before {
+  content: '';
+  position: absolute;
+  left: 135px;
+  top: 304px;
+  border-style: solid;
+  border-width: 6px;
+  border-color: transparent;
+  margin-left: -6px;
+  border-bottom-width: 0;
+  border-top-color: #eeeeee;
+}
+
+.sp-container[data-alignment="r"] .sp-palette-arrow:before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 165px;
+  border-style: solid;
+  border-width: 6px;
+  border-color: transparent;
+  border-left-width: 0;
+  border-right-color: #eeeeee;
+}
+
+.sp-container[data-alignment="b"] .sp-palette-arrow:before {
+  content: '';
+  position: absolute;
+  left: 135px;
+  top: -6px;
+  border-style: solid;
+  border-width: 6px;
+  border-color: transparent;
+  margin-left: -6px;
+  border-top-width: 0;
+  border-bottom-color: #eeeeee;
+}
+
+.sp-container[data-alignment="l"] .sp-palette-arrow:before {
+  content: '';
+  position: absolute;
+  left: 270px;
+  top: 165px;
+  border-style: solid;
+  border-width: 6px;
+  border-color: transparent;
+  border-right-width: 0;
+  border-left-color: #eeeeee;
+}
+
 /* Input */
 .sp-input-container {
     float:right;
-    width: 100px;
-    margin-bottom: 4px;
+    width: 170px;
+    margin-bottom: 10px;
     margin-top: 5px;
 }
 .sp-initial-disabled  .sp-input-container {
     width: 100%;
 }
 .sp-input {
-   font-size: 12px !important;
-   border: 1px inset;
-   padding: 4px 5px;
-   margin: 0;
-   width: 100%;
-   background:transparent;
-   border-radius: 3px;
-   color: #222;
+  /*border-radius: 3px;*/
+  font-size: 12px !important;
+  padding: 4px;
+  margin: 0;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #ccc;
+  color: #222
 }
-.sp-input:focus  {
-    border: 1px solid orange;
+.sp-input:focus {
+    border: 1px solid #1baee1;
+    outline: 0;
 }
 .sp-input.sp-validation-error {
     border: 1px solid red;
     background: #fdd;
 }
+
+
+/*
 .sp-picker-container , .sp-palette-container {
     float:left;
     position: relative;
@@ -258,33 +325,31 @@ See http://bgrins.github.io/spectrum/themes/ for instructions.
     padding-bottom: 300px;
     margin-bottom: -290px;
 }
+*/
+
+.sp-picker-container , .sp-palette-container {
+    float:left;
+    position: relative;
+    margin: 0;
+    border: 0;
+}
+
+
 .sp-picker-container {
-    width: 172px;
-    border-left: solid 1px #fff;
+    width: 240px;
+    padding: 15px;
 }
 
 /* Palettes */
 .sp-palette-container {
-    border-right: solid 1px #ccc;
+  min-width: 240px;
+  padding: 15px 15px 5px 15px;
 }
 
-.sp-palette-only .sp-palette-container {
-    border: 0;
+.sp-container:not(.sp-palette-only) .sp-palette-container {
+  border-bottom: 1px solid #bbb;
 }
 
-.sp-palette .sp-thumb-el {
-    display: block;
-    position:relative;
-    float:left;
-    width: 24px;
-    height: 15px;
-    margin: 3px;
-    cursor: pointer;
-    border:solid 2px transparent;
-}
-.sp-palette .sp-thumb-el:hover, .sp-palette .sp-thumb-el.sp-thumb-active {
-    border-color: orange;
-}
 .sp-thumb-el {
     position:relative;
 }
@@ -352,23 +417,29 @@ See http://bgrins.github.io/spectrum/themes/ for instructions.
     z-index: 0;
 }
 
-.sp-palette {
-    *width: 220px;
-    max-width: 220px;
-}
 .sp-palette .sp-thumb-el {
-    width:16px;
-    height: 16px;
+    width:20px;
+    height: 20px;
     margin:2px 1px;
     border: solid 1px #d0d0d0;
+    display: block;
+    position:relative;
+    float:left;
+    cursor: pointer;
+}
+.sp-palette .sp-thumb-el:hover, .sp-palette .sp-thumb-el.sp-thumb-active {
+    border-color: #888;
 }
 
-.sp-container {
-    padding-bottom:0;
+.sp-palette-row-selection {
+  border-top: 1px solid #CCC;
+  padding-top: 10px;
+  margin-top: 10px;
+  padding-bottom: 8px;
 }
-
 
 /* Buttons: http://hellohappy.org/css3-buttons/ */
+/*
 .sp-container button {
   background-color: #eeeeee;
   background-image: linear-gradient(to bottom, #eeeeee, #cccccc);
@@ -383,6 +454,9 @@ See http://bgrins.github.io/spectrum/themes/ for instructions.
   text-shadow: 0 1px 0 #eee;
   vertical-align: middle;
 }
+*/
+
+/*
 .sp-container button:hover {
     background-color: #dddddd;
     background-image: linear-gradient(to bottom, #dddddd, #bbbbbb);
@@ -400,6 +474,9 @@ See http://bgrins.github.io/spectrum/themes/ for instructions.
     -o-box-shadow: inset 0 0 5px 2px #aaaaaa, 0 1px 0 0 #eeeeee;
     box-shadow: inset 0 0 5px 2px #aaaaaa, 0 1px 0 0 #eeeeee;
 }
+*/
+
+/*
 .sp-cancel {
     font-size: 11px;
     color: #d93f3f !important;
@@ -414,7 +491,56 @@ See http://bgrins.github.io/spectrum/themes/ for instructions.
     color: #d93f3f !important;
     text-decoration: underline;
 }
+*/
+.sp-container button {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor:pointer;
+    outline: 0;
+    text-transform: uppercase;
+    vertical-align: middle;
+    -webkit-tap-highlight-color: transparent;
+}
 
+.sp-container.sp-palette-only .sp-palette-toggle, .sp-container .sp-palette-toggle {
+    opacity: 0.3;
+    padding: 0px 2px 5px;
+}
+
+.sp-container .sp-palette-toggle {
+    opacity: 0.7;
+}
+
+.sp-container.sp-palette-only .sp-palette-toggle:hover{
+    background: inherit;
+    border: inherit;
+    opacity: 0.5;
+}
+
+.sp-button-container button {
+    border: 2px solid #bbbbbb;
+    border-radius: 2px;
+    padding: 3px 10px;
+    color: #000;
+    margin-left: 10px;
+}
+
+.sp-button-container button:hover {
+    background: transparent;
+    border-color: #6e6e6e;
+}
+
+.sp-button-container .sp-choose {
+  color: #fff;
+  background: #555555;
+  border: 0;
+  padding: 5px 12px;
+}
+
+.sp-button-container .sp-choose:hover {
+  background: #7b7b7b;
+}
 
 .sp-palette span:hover, .sp-palette span.sp-thumb-active {
     border-color: #000;
