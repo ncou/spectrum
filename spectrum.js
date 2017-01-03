@@ -30,30 +30,28 @@
         // Options
         color: false,
         flat: false,
-        showInput: false,
+        showInput: true,
         allowEmpty: false,
         showButtons: true,
         clickoutFiresChange: true,
-        showInitial: false,
-        showPalette: false,
-        showPaletteOnly: false,
-        hideAfterPaletteSelect: false,
-        togglePaletteOnly: false,
+        showInitial: true,
+        showPalette: true,
+        showPaletteOnly: true,
         showSelectionPalette: true,
+        showAlpha: false,
+        hideAfterPaletteSelect: true,
+        togglePaletteOnly: true,
+        maxSelectionSize: 10,
         localStorageKey: false,
         appendTo: "body",
-        maxSelectionSize: 10,
-        cancelText: "cancel",
-        chooseText: "choose",
-        togglePaletteMoreText: "more",
-        togglePaletteLessText: "less",
+        cancelText: "Cancel",
+        chooseText: "Apply",
         clearText: "Clear Color Selection",
         noColorSelectedText: "No Color Selected",
         preferredFormat: false,
         className: "", // Deprecated - use containerClassName and replacerClassName instead.
         containerClassName: "",
         replacerClassName: "",
-        showAlpha: false,
         theme: "sp-light",
         palette: [
             ["rgb(0, 0, 0)", "rgb(34, 34, 34)", "rgb(68, 68, 68)", "rgb(102, 102, 102)", "rgb(136, 136, 136)", "rgb(170, 170, 170)", "rgb(204, 204, 204)", "rgb(238, 238, 238)", "rgb(255, 255, 255)", "transparent"],
@@ -87,7 +85,7 @@
                 "<div class='sp-palette-container'>",
                     "<div class='sp-palette sp-thumb sp-cf'></div>",
                     "<div class='sp-palette-button-container sp-cf'>",
-                        "<button type='button' class='sp-palette-toggle'></button>",
+                        "<button type='button' class='sp-palette-toggle' title='Options'><img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAYCAYAAAAVibZIAAABaklEQVRIS7WV4TEEQRCFv4sAESACRIAIEAEiQCSIwMngRIAMiAARIALqu5rZ6p3b2Vt3rv907c72m+7Xr3tHrMBGAzHPgE3gAxjPixkCug58JqAvYBvQV60EFaAMMMu7gHBeZGuM1sRFUA8fgS3gBrgFdoHr5DPuC3AF6C+AS+AdOMzAEVSuTufx1XNuEl5ABD1ImS6Ka6ZPJajPvtxfAPUZMKmplY2SS3mK9po4ljc5tnE7xTdN6SWojXoDcjc9fwCOOzKfAEfhfUtqZmqQDeoK3qhoMmo33ullE0F/KhxatuXWTEmVNDSc1kAN2lsUVOItPXKUsf5avj0YlxNlh9dCdnJ0MqBR32kSp6M6RFLS4LTps6RKrquSWkb8Do0TNSP+lYzpsgvlPk1bi1MFbRl59TmycqePelS/biM51ufVZ6WdjZpZuOn2viUtj63lPvR3EqVW026jvCGgfuyASIvg//Lj65nU7qNftTZPxvbjYYkAAAAASUVORK5CYII='></button>",
                     "</div>",
                 "</div>",
                 "<div class='sp-picker-container'>",
@@ -114,7 +112,7 @@
                     "</div>",
                     "<div class='sp-initial sp-thumb sp-cf'></div>",
                     "<div class='sp-button-container sp-cf'>",
-                        "<a class='sp-cancel' href='#'></a>",
+                        "<button type='button' class='sp-cancel'></button>",
                         "<button type='button' class='sp-choose'></button>",
                     "</div>",
                 "</div>",
@@ -177,6 +175,7 @@
             localStorageKey = opts.localStorageKey,
             theme = opts.theme,
             callbacks = opts.callbacks,
+            resize = throttle(reflow, 25),
             visible = false,
             isDragging = false,
             dragWidth = 0,
@@ -238,8 +237,6 @@
                 opts.showPalette = true;
             }
 
-            toggleButton.text(opts.showPaletteOnly ? opts.togglePaletteMoreText : opts.togglePaletteLessText);
-
             if (opts.palette) {
                 palette = opts.palette.slice(0);
                 paletteArray = $.isArray(palette[0]) ? palette : [palette];
@@ -294,8 +291,13 @@
             updateSelectionPaletteFromStorage();
 
             offsetElement.on("click.spectrum touchstart.spectrum", function (e) {
-                if (!disabled) {
-                    toggle();
+
+                if (visible) {
+                    clickout(e);
+                } else {
+                    if (!disabled) {
+                        toggle();
+                    }
                 }
 
                 e.stopPropagation();
@@ -351,7 +353,6 @@
                 }
             });
 
-            toggleButton.text(opts.showPaletteOnly ? opts.togglePaletteMoreText : opts.togglePaletteLessText);
             toggleButton.on("click.spectrum", function (e) {
                 e.stopPropagation();
                 e.preventDefault();
@@ -363,9 +364,11 @@
                 // to the left to make space for the picker, plus 5px extra.
                 // The 'applyOptions' function puts the whole container back into place
                 // and takes care of the button-text and the sp-palette-only CSS class.
+                /*
                 if (!opts.showPaletteOnly && !flat) {
                     container.css('left', '-=' + (pickerContainer.outerWidth(true) + 5));
                 }
+                */
                 applyOptions();
             });
 
@@ -613,6 +616,7 @@
 
             $(doc).on("keydown.spectrum", onkeydown);
             $(doc).on("click.spectrum", clickout);
+            $(window).on("resize.spectrum", resize);
 
             replacer.addClass("sp-active");
             container.removeClass("sp-hidden");
@@ -624,6 +628,10 @@
 
             drawInitial();
             callbacks.show(colorOnShow);
+
+
+
+            
             boundElement.trigger('show.spectrum', [ colorOnShow ]);
         }
 
@@ -659,6 +667,7 @@
 
             $(doc).off("keydown.spectrum", onkeydown);
             $(doc).off("click.spectrum", clickout);
+            $(window).off("resize.spectrum", resize);
 
             replacer.removeClass("sp-active");
             container.addClass("sp-hidden");
@@ -897,6 +906,12 @@
 
             $(doc).off("keydown.spectrum", onkeydown);
             $(doc).off("click.spectrum", clickout);
+            $(window).off("resize.spectrum", resize);
+
+            // destroy all the bind for the plugin namespace
+            offsetElement.off(".spectrum");
+             $(doc).off(".spectrum");
+            $(window).off(".spectrum");
 
             container.remove();
             replacer.remove();
@@ -1089,6 +1104,19 @@
         }
 
         $(element).on("touchstart mousedown", start);
+    }
+
+    function throttle(func, wait, debounce) {
+        var timeout;
+        return function () {
+            var context = this, args = arguments;
+            var throttler = function () {
+                timeout = null;
+                func.apply(context, args);
+            };
+            if (debounce) clearTimeout(timeout);
+            if (debounce || !timeout) timeout = setTimeout(throttler, wait);
+        };
     }
 
     function inputTypeColorSupport() {
