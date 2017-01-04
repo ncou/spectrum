@@ -34,9 +34,11 @@
         allowEmpty: false,
         showButtons: true,
         clickoutFiresChange: true,
+        containerAlignment: "r",
         showInitial: true,
         showPalette: true,
         showPaletteOnly: true,
+        showPaletteArrow: false,
         showSelectionPalette: true,
         showAlpha: false,
         hideAfterPaletteSelect: true,
@@ -84,8 +86,8 @@
     ].join(''),
     markup = (function () {
         return [
-            "<div class='sp-container sp-hidden' data-alignment='r'>",
-                "<div class='sp-palette-arrow'></div>",
+            "<div class='sp-container sp-hidden' data-alignment=''>",
+                "<div class='sp-palette-arrow sp-hidden'></div>",
                 "<div class='sp-palette-container'>",
                     "<div class='sp-palette sp-thumb sp-cf'></div>",
                     "<div class='sp-palette-button-container sp-cf'>",
@@ -217,6 +219,7 @@
             alphaSlideHelper = container.find(".sp-alpha-handle"),
             textInput = container.find(".sp-input"),
             paletteContainer = container.find(".sp-palette"),
+            paletteArrow = container.find(".sp-palette-arrow"),
             initialColorContainer = container.find(".sp-initial"),
             cancelButton = container.find(".sp-cancel"),
             clearButton = container.find(".sp-clear"),
@@ -270,6 +273,14 @@
         function initialize() {
 
             applyOptions();
+
+            console.log('opts.containerAlignment', opts.containerAlignment);
+
+            container.attr("data-alignment", opts.containerAlignment);
+
+            if (opts.showPaletteArrow) {
+                paletteArrow.removeClass("sp-hidden");
+            }
 
             if (shouldReplace) {
                 boundElement.after(replacer).hide();
@@ -891,7 +902,8 @@
 
             if (!flat) {
                 container.css("position", "absolute");
-                container.offset(getOffset(container, offsetElement));
+                //container.offset(getOffset(container, offsetElement));
+                setOffsetContainer(container, paletteArrow, offsetElement);
             }
 
             updateHelperLocations();
@@ -979,41 +991,71 @@
     * checkOffset - get the offset below/above and left/right element depending on screen position
     * Thanks https://github.com/jquery/jquery-ui/blob/master/ui/jquery.ui.datepicker.js
     */
-    function getOffset(picker, input) {
-        //var extraY = 0;
-        var dpWidth = picker.outerWidth();
-        var dpHeight = picker.outerHeight();
-        var inputHeight = input.outerHeight();
-        var inputWidth = input.outerWidth();
-        
-        /*
-        var doc = picker[0].ownerDocument;
-        var docElem = doc.documentElement;
-        var viewWidth = docElem.clientWidth + $(doc).scrollLeft();
-        var viewHeight = docElem.clientHeight + $(doc).scrollTop();
-        */
+    function setOffsetContainer(picker, arrowElement, input) {
 
-        var offset = input.offset();
+        var alignment = picker.attr("data-alignment"),
+            extraPadding = 10,
+            dpWidth = picker.outerWidth(),
+            dpHeight = picker.outerHeight(),
+            offset = input.offset(),
+            inputWidth = input.outerWidth(),
+            inputHeight = input.outerHeight(),
+            offsetLeft = offset.left,
+            offsetTop = offset.top; 
 
-        var offsetLeft = offset.left;
-        var offsetTop = offset.top;
+         switch (alignment) {
+            case "t":
+               offsetLeft += (inputWidth - dpWidth) / 2;
+               offsetTop -= dpHeight + extraPadding;
+               break;
+            case "b":
+               offsetLeft += (inputWidth - dpWidth) / 2;
+               offsetTop += inputHeight + extraPadding;
+               break;
+            case "l":
+               offsetLeft -= dpWidth + extraPadding;
+               offsetTop += (inputHeight - dpHeight) / 2;
+               break;
+            case "r":
+               offsetLeft += inputWidth + extraPadding;
+               offsetTop += (inputHeight - dpHeight) / 2;
+         }
 
-        //offsetTop += inputHeight;
+         // bound if the colorpicker will be outside the screen
+         offsetLeft = Math.min(Math.max(offsetLeft, extraPadding), window.innerWidth - dpWidth - extraPadding);
+         offsetTop = Math.min(Math.max(offsetTop, extraPadding), window.innerHeight - dpHeight - extraPadding);
 
-        //offsetLeft -= Math.min(offsetLeft, (offsetLeft + dpWidth > viewWidth && viewWidth > dpWidth) ? Math.abs(offsetLeft + dpWidth - viewWidth) : 0);
+         var arrowSize = 6, arrowX, arrowY;
 
-        //offsetTop -= Math.min(offsetTop, ((offsetTop + dpHeight > viewHeight && viewHeight > dpHeight) ? Math.abs(dpHeight + inputHeight - extraY) : extraY));
+         switch (alignment) {
+            case "t":
+               arrowX = offset.left - offsetLeft + inputWidth / 2;
+               arrowY = dpHeight;
+               break;
+            case "b":
+               arrowX = offset.left - offsetLeft + inputWidth / 2;
+               arrowY = -arrowSize;
+               break;
+            case "l":
+               arrowX = dpWidth;
+               arrowY = offset.top - offsetTop -arrowSize + inputHeight / 2;
+               break;
+            case "r":
+               arrowX = -arrowSize;
+               arrowY = offset.top - offsetTop -arrowSize + inputHeight / 2;
+         }
 
-        console.log(dpHeight)
 
-        offsetTop -= 154;
-        offsetLeft += inputWidth + 10;
-        //offsetLeft -= dpWidth + 10;
+         picker.css({
+            left: offsetLeft,
+            top: offsetTop
+         })
 
-        return {
-            top: offsetTop,
-            left: offsetLeft
-        };
+         arrowElement.css({
+            left: arrowX,
+            top: arrowY
+         })
+
     }
 
     /**
