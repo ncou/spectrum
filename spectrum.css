@@ -18,14 +18,6 @@ License: MIT
     position: relative;
 }
 
-/* Fix for * { box-sizing: border-box; } */
-.sp-container,
-.sp-container * {
-    -webkit-box-sizing: content-box;
-       -moz-box-sizing: content-box;
-            box-sizing: content-box;
-}
-
 /* http://ansciath.tumblr.com/post/7347495869/css-aspect-ratio */
 .sp-top {
   position:relative;
@@ -167,15 +159,8 @@ License: MIT
 }
 
 /* Clearfix hack */
-.sp-cf:before, .sp-cf:after { content: ""; display: table; }
-.sp-cf:after { clear: both; }
+.sp-cf:after { content: ""; display: table; clear: both; }
 
-/* Mobile devices, make hue slider bigger so it is easier to slide */
-@media (max-device-width: 480px) {
-    .sp-color { right: 40%; }
-    .sp-hue { left: 63%; }
-    .sp-fill { padding-top: 60%; }
-}
 .sp-dragger {
   border-radius: 50%;
   height: 12px;
