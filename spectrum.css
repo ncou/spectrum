@@ -19,14 +19,12 @@ License: MIT
 }
 
 /* Fix for * { box-sizing: border-box; } */
-/*
 .sp-container,
 .sp-container * {
     -webkit-box-sizing: content-box;
        -moz-box-sizing: content-box;
             box-sizing: content-box;
 }
-*/
 
 /* http://ansciath.tumblr.com/post/7347495869/css-aspect-ratio */
 .sp-top {
@@ -169,16 +167,15 @@ License: MIT
 }
 
 /* Clearfix hack */
-.sp-cf:after { content: ""; display: table; clear: both; }
+.sp-cf:before, .sp-cf:after { content: ""; display: table; }
+.sp-cf:after { clear: both; }
 
 /* Mobile devices, make hue slider bigger so it is easier to slide */
-/*
 @media (max-device-width: 480px) {
     .sp-color { right: 40%; }
     .sp-hue { left: 63%; }
     .sp-fill { padding-top: 60%; }
 }
-*/
 .sp-dragger {
   border-radius: 50%;
   height: 12px;
@@ -243,8 +240,8 @@ See http://bgrins.github.io/spectrum/themes/ for instructions.
 .sp-container[data-alignment="t"] .sp-palette-arrow:before {
   content: '';
   position: absolute;
-  left: 135px;
-  top: 304px;
+  left: 0px;
+  top: 0px;
   border-style: solid;
   border-width: 6px;
   border-color: transparent;
@@ -256,8 +253,8 @@ See http://bgrins.github.io/spectrum/themes/ for instructions.
 .sp-container[data-alignment="r"] .sp-palette-arrow:before {
   content: '';
   position: absolute;
-  left: -6px;
-  top: 165px;
+  left: 0px;
+  top: 0px;
   border-style: solid;
   border-width: 6px;
   border-color: transparent;
@@ -268,8 +265,8 @@ See http://bgrins.github.io/spectrum/themes/ for instructions.
 .sp-container[data-alignment="b"] .sp-palette-arrow:before {
   content: '';
   position: absolute;
-  left: 135px;
-  top: -6px;
+  left: 0px;
+  top: 0px;
   border-style: solid;
   border-width: 6px;
   border-color: transparent;
@@ -281,8 +278,8 @@ See http://bgrins.github.io/spectrum/themes/ for instructions.
 .sp-container[data-alignment="l"] .sp-palette-arrow:before {
   content: '';
   position: absolute;
-  left: 270px;
-  top: 165px;
+  left: 0px;
+  top: 0px;
   border-style: solid;
   border-width: 6px;
   border-color: transparent;
