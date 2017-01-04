@@ -209,7 +209,8 @@ See http://bgrins.github.io/spectrum/themes/ for instructions.
     transition: opacity 0.1s ease-out;
 }
 .sp-container, .sp-container button, .sp-container input, .sp-color, .sp-hue, .sp-clear {
-    font: normal 12px "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+    font: normal 12px "Open Sans", Helvetica, sans-serif;
+    font-weight: normal;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     -ms-box-sizing: border-box;
@@ -366,7 +367,8 @@ See http://bgrins.github.io/spectrum/themes/ for instructions.
 /* Buttons */
 .sp-palette-button-container,
 .sp-button-container {
-    float: right;
+    /*float: right;*/
+    text-align: right;
 }
 
 /* Replacer (the little preview div that shows up instead of the <input>) */
@@ -491,6 +493,7 @@ See http://bgrins.github.io/spectrum/themes/ for instructions.
     text-transform: uppercase;
     vertical-align: middle;
     -webkit-tap-highlight-color: transparent;
+    line-height: 1;
 }
 
 .sp-container.sp-palette-only .sp-palette-toggle, .sp-container .sp-palette-toggle {
