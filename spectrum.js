@@ -274,8 +274,6 @@
 
             applyOptions();
 
-            console.log('opts.containerAlignment', opts.containerAlignment);
-
             container.attr("data-alignment", opts.containerAlignment);
 
             if (opts.showPaletteArrow) {
